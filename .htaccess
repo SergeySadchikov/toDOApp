@@ -1,0 +1,8 @@
+AddDefaultCharset utf8
+
+RewriteEngine on
+#Если  не  файл и не дир-я
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+#to index.php
+RewriteRule ^(.*)$ index.php

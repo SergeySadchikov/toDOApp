@@ -1,0 +1,121 @@
+* {
+	box-sizing: border-box;
+}
+html, body, p, h1, h2, h3, h4, h5, h6 {
+	padding: 0;
+	margin: 0;
+}
+body {
+	background: #f8f6f5;
+}
+/*p {
+	color: red;
+}*/
+main {
+	font-family: 'Noto Sans', sans-serif;
+	color: #585858;
+}
+.hidden {
+	display: none;
+}
+.feedback {
+	font-size: 12px;
+	margin-top: 5px;
+}
+.resolve {
+	color: #00cc44;	
+}
+.reject {
+	color: #ff3300;	
+}
+/*Task List*/
+
+.task {
+	background: #f0f5fd;
+	/*padding: 10px 30px;*/
+	box-shadow: 0 0 10px rgba(0,0,0,0.5);
+	margin: 30px 0px;
+	border-radius: 20px;
+	position: relative;
+}
+/*.task .row {
+	margin: 5px 0px;
+}*/
+.row {
+    margin-right: 0px;
+    margin-left: 0px;
+}
+.task-marker {
+	font-style: italic;
+	font-size: 12px;
+/*	display: inline-block;
+*/	margin-right: 10px;
+}
+.task-name {
+	margin-right: 10px;
+}
+.task-name,.task-surname, .task-email, .task-time, .text-info, .text-secondary, .text-success {
+	font-size: 14px;
+	font-weight:bold;
+}
+.task-content {
+	padding: 10px 30px;
+}
+.task-header {
+	background: #e3eeef;
+	border-top-left-radius: 20px;
+	border-top-right-radius: 20px;
+	padding: 10px 30px;
+	box-shadow: 0px 0px 10px 0px #e9eeef;
+}
+.task-footer {
+	/*background: #e3eeef;*/
+	border-bottom-left-radius: 20px;
+	border-bottom-right-radius: 20px;
+	padding: 10px 30px;
+}
+
+.fas.fa-edit, .far.fa-clock, .fas.fa-hammer, .fas.fa-check-square {
+	font-size: 14px;
+	cursor: pointer;
+}
+.far.fa-clock, .fas.fa-hammer, .fas.fa-check-square {
+	margin-left: 14px;
+}
+.task-status{
+	display: inline-block;
+}
+.task-status .hidden {
+	display: none;
+}
+.delete {
+	position: absolute;
+	top: 10px;
+	right: 20px;
+}
+/*Состояние all*/
+.task.all .delete, .task.all .edit, .task.all .change-status, .task.all #task-edit-assigned, .task.all #task-edit-description, .task.all .fas.fa-save {
+	display: none;
+}
+/*Состояние received */
+.task.received .delete, .task.received .edit, .task.received #task-edit-assigned, .task.received #task-edit-description, .task.received .fas.fa-save {
+	display: none;
+}
+/*Состояние added */
+.task.added .change-status, .task.added #task-edit-assigned, .task.added #task-edit-description, .task.added .fas.fa-save {
+	display: none;
+}
+/*Состояние edit */
+.task.edit .assigned-user, .task.edit .task-description, .task.edit .change-status, .task.edit .fas.fa-edit {
+	display: none;
+}
+/*Статусы заданий*/
+div[data-status="Ожидает"] .start, div[data-status="Ожидает"] .done {
+	display: none;
+}
+div[data-status="В процессе"] .wait, div[data-status="В процессе"] .done {
+	display: none;
+}
+div[data-status="Завершено"] .wait, div[data-status="Завершено"] .start {
+	display: none;
+}
