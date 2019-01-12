@@ -42,7 +42,7 @@ function taskTemplate(task) {
                             {tag: 'span', className: ['text-info', 'wait'], content: task.is_done},
                             {tag: 'span', className: ['text-secondary', 'start'], content: task.is_done},
                             {tag: 'span', className: ['text-success', 'done'], content: task.is_done},
-                            {div: 'span', className: 'task-status', content: [{tag: 'i', className: ['far', 'fa-clock', 'wait']},
+                            {tag: 'span', className: 'task-status', content: [{tag: 'i', className: ['far', 'fa-clock', 'wait']},
                                                                               {tag: 'i', className: ['fas', 'fa-hammer', 'start']},
                                                                               {tag: 'i', className: ['fas', 'fa-check-square', 'done']}]
                             }]
@@ -53,8 +53,8 @@ function taskTemplate(task) {
                   content: {
                             tag: 'button',
                             className: 'close',
-                            attr: {'aria-label': "Close", type: 'button'},
-                            content: {tag: 'span', attr: {'aria-hidden': 'true'}, content: {tag: 'i', className: ['fas', 'fa-times'], attr: {id: 'deleteBtn'}}}
+                            attr: {'aria-label': "Close", type: 'button', id: 'deleteBtn'},
+                            content: ""
                           }
                  }]
 	  },
@@ -152,6 +152,20 @@ function taskTemplate(task) {
                }]
           }]
     }  
+}
+//pagination `<li class="page-item"><a class="page-link" id="${i}" href="">${i}</a></li>`;
+
+function pageNumberTemplate(number) {
+  return {
+    tag: 'li',
+    className: ['page-item', 'number'],
+    attr: {id: number},
+    content:[{
+              tag: 'a',
+              className: 'page-link',
+              content: number 
+            }]
+  }
 }
 
 function browserJSEngine(block) {

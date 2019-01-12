@@ -1,7 +1,7 @@
 <?php
 return [
   'all' => ['login','register'],
-  'authorize' => [],
+  'authorize' => ['user'],
   'guest' => [],
   'admin' => []
 ];

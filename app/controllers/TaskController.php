@@ -12,66 +12,63 @@ namespace app\controllers;
 use app\core\Controller;
 use app\core\View;
 use app\models\Account;
+use app\core\Pagination;
 
 class TaskController extends Controller
 {
-    private $userModel;
+    public $pagination;
     public $task;
-
     public $description;
+    public $taskId;
+    public $status;
 
-    public function __construct($route)
-    {
-        parent::__construct($route);
-        $this->userModel = new Account();
-    }
+
     public function addAction()
     {
         $postData = file_get_contents('php://input', true);
         $data = json_decode($postData, true);
         $this->description = htmlspecialchars($data['description']);
         if (!empty($data['userId'])) {
-            $this->model->addTask(['description' => $this->description, 'is_done' => 'Ожидает', 'user_id' => $_SESSION['authorize']['id'], 'assigned_user_id' => $data['userId']]);
+            $this->model->addTask($this->description, 'Ожидает', $_SESSION['authorize']['id'], $data['userId']);
             View::message('success', $data);
         } else {
-            $this->model->addTask(['description' => $this->description, 'is_done' => 'Ожидает', 'user_id' => $_SESSION['authorize']['id'], 'assigned_user_id' => $_SESSION['authorize']['id']]);
+            $this->model->addTask($this->description, 'Ожидает', $_SESSION['authorize']['id'], $_SESSION['authorize']['id']);
         }
-        //$user =  $this->userModel->getUserById(['id' => $_SESSION['authorize']['id']]);
-
     }
     public function allAction()
     {
-        $allTasks = $this->model->getAllTasks();
-        View::message('success', $allTasks);
+        $this->pagination = new Pagination($this->route, $this->model->getCount());
+        $allTasks = $this->model->getTasks($this->pagination->offset, $this->pagination->limit);
+        View::message('success', $allTasks, $this->pagination->pageCount);
     }
     public function myAction()
     {
-        $myTasks = $this->model->getMyTasks(['user_id' => $_SESSION['authorize']['id']]);
-        View::message('success', $myTasks);
+        $this->pagination = new Pagination($this->route, $this->model->getCount(false, $_SESSION['authorize']['id']));
+        $myTasks = $this->model->getTasks($this->pagination->offset, $this->pagination->limit, false, $_SESSION['authorize']['id']);
+        View::message('success', $myTasks, $this->pagination->pageCount);
     }
     public function addedAction()
     {
-        $addedTasks = $this->model->getAddedTasks(['author_id' => $_SESSION['authorize']['id']]);
-        View::message('success', $addedTasks);
+        $this->pagination = new Pagination($this->route, $this->model->getCount($_SESSION['authorize']['id']));
+        $addedTasks = $this->model->getTasks($this->pagination->offset, $this->pagination->limit, $_SESSION['authorize']['id']);
+        View::message('success', $addedTasks, $this->pagination->pageCount);
     }
     public function editAction()
     {
         $putData = file_get_contents('php://input', true);
         $data = json_decode($putData, true);
-        $this->task = $this->model->getTask(['id' => $this->route['id']]);
+        $this->taskId = $this->route['id'];
+        $this->task = $this->model->getTask($this->taskId);
         if (!empty($data['assigned_user_id'])) {
-            $params = [
-                'assigned_user_id' => $data['assigned_user_id'],
-                'description' => $data['description'],
-                'id' => $data['id']
-            ];
-            $this->isAuthor() ? $this->model->editTask($params) : View::errorCode(403);
+            $this->description = trim(htmlspecialchars($data['description']));
+            $this->isAuthor() ? $this->model->editTask($this->taskId, $data['assigned_user_id'], $this->description) : View::errorCode(403);
+            $this->pagination = new Pagination($this->route, $this->model->getCount($_SESSION['authorize']['id']));
+            View::message('success', 'Задание успешно отредактировано', $this->pagination->pageCount);
         } else {
-            $params = [
-                'id' => $data['id'],
-                'is_done' => $data['status']
-            ];
-            $this->isAssigned() ? $this->model->changeStatus($params) : View::errorCode(403);
+            $this->status = trim(htmlspecialchars($data['status']));
+            $this->isAssigned() ? $this->model->changeStatus($this->taskId, $this->status) : View::errorCode(403);
+            $this->pagination = new Pagination($this->route, $this->model->getCount(false, $_SESSION['authorize']['id']));
+            View::message('success', 'Статус изменён', $this->pagination->pageCount);
         }
     }
     public function isAssigned()
@@ -90,7 +87,10 @@ class TaskController extends Controller
     }
     public function deleteAction()
     {
-        $this->task = $this->model->getTask(['id' => $this->route['id']]);
-        $this->isAuthor() ? $this->model->deleteTask(['id' => $this->route['id']]) : View::errorCode(403);
+        $this->taskId = $this->route['id'];
+        $this->task = $this->model->getTask($this->taskId);
+        $this->isAuthor() ? $this->model->deleteTask($this->taskId) : View::errorCode(403);
+        $this->pagination = new Pagination($this->route, $this->model->getCount($_SESSION['authorize']['id']));
+        View::message('success', 'Задание успешно удалено', $this->pagination->pageCount);
     }
 }

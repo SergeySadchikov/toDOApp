@@ -1,8 +1,9 @@
 'use strict';
+//*****ACCOUNT*****
 
-//*****РЕГИСТРАЦИЯ*****
-function registerAction(event) {
-  event.preventDefault();
+//registrtation
+function registerAction() {
+  if (localStorage.userID) return;
   if (!acceptValidation) return;
   const sendData = {};
   const dataForm = new FormData(signUpForm);
@@ -22,39 +23,25 @@ function registerAction(event) {
       throw new Error(res.statusText);
     })
     .then((res) => res.json())
-    .then((data) => { 
-      if (data.error) {
-        event.target.getElementsByClassName('error-message')[0].textContent = data.message;  
+    .then((data) => {
+      preloader.classList.toggle('hidden');
+      signUpForm.classList.toggle('hidden');
+      signInForm.classList.toggle('hidden'); 
+      if (data.status === 'error') {
+        document.querySelector(".sign-up .alert").classList.remove('hidden');
+        document.querySelector(".sign-up .alert").textContent = data.message;
       } else {
-        // event.target.getElementsByClassName('error-message')[0].textContent = event.target.classList.contains('sign-in-htm') ?
-        //   `Пользователь ${data.name} успешно авторизован` : `Пользователь ${data.name} успешно зарегистрирован`;
-        console.log(data);
-        localStorage.userID = data.message.id;
-    	  localStorage.userEmail = data.message.email;
-		    document.location.href="/";
-      }
-      
+        $('#register').modal('hide');
+        $('#confirmMsg').modal('show');
+      }  
      })
-    .catch((error) => {  
-      event.target.getElementsByClassName('alert-danger')[0].textContent = `Ошибка ${error}`;     
-    });
+    .catch(error => console.log(error));
 }
-signUpForm.addEventListener('submit', registerAction);
 
-//*****АУТЕНТИФИКАЦИЯ*****
-function checkFields(event) {
-	const reg = /^[\s]+$/;
-	//event.target.value = event.target.value.replace(reg, '');
-	if (Array.from(signInForm.querySelectorAll('input.form-control')).some(input => input.value === '')) {
-		submitAuthBtn.disabled = true;				
-	} else {
-		submitAuthBtn.disabled = false;	
-	}
-}
-signInForm.addEventListener('input', checkFields);
-
-function loginAction(event) {
-	event.preventDefault();
+//auth
+function loginAction() {
+  if (localStorage.userID) return;
+  if (!acceptValidation) return;
  	const sendData = {};
  	const dataForm = new FormData(signInForm);
   	for (const [key, value] of dataForm) {
@@ -73,37 +60,48 @@ function loginAction(event) {
       throw new Error(res.statusText);
     })
     .then((res) => res.json())
-    .then((data) => { 
-    if (data.error) {
-        event.target.getElementsByClassName('error-message')[0].textContent = data.message;  
+    .then((data) => {
+      preloader.classList.toggle('hidden');
+      signUpForm.classList.toggle('hidden');
+      signInForm.classList.toggle('hidden'); 
+      if (data.status === 'error') {
+          document.querySelector(".sign-in .alert").classList.remove('hidden');
+          document.querySelector(".sign-in .alert").textContent = data.message;
       } else {
-        // event.target.getElementsByClassName('error-message')[0].textContent = event.target.classList.contains('sign-in-htm') ?
-        //   `Пользователь ${data.name} успешно авторизован` : `Пользователь ${data.name} успешно зарегистрирован`;
-        console.log(data);
-        if (data.status === 'success') {
-          localStorage.userID = data.message.id;
-          localStorage.userEmail = data.message.email;
-			    document.location.href="/";       	
-        }
+          document.location.href = "/";      	
       }
-      
-     })
-    .catch((error) => {
-    	console.log(error);  
-      //event.target.getElementsByClassName('alert-danger')[0].textContent = `Ошибка ${error}`;     
-    });
+    })
+    .catch(error => console.log(error));
 }		
-signInForm.addEventListener('submit', loginAction);
 
-//*****LOGOUT*****
+//logout
 function logoutAction() {
 	const request = fetch('/account/logout', {
   	method: 'GET',
   })
     .then(() => document.location.href="/");	
 }
-
-//*****USERS*****
+//auth-user data
+function getAuthUserData() {
+  const request = fetch('account/user', {
+    method: 'GET',
+  })
+    .then((res) => {
+      if (200 <= res.status && res.status < 300) {
+        return res;
+      }
+    })
+    .then((res) => res.json())
+    .then(data => {
+      if (data.status !== 'success') return;
+      localStorage.userID = data.message.id;
+      localStorage.userEmail = data.message.email;
+    })
+    .then(() => navbarDropdown.textContent = localStorage.userEmail)
+    .then(getTasks(appState))
+    .catch(error => console.log(error)); 
+}
+//users
 function getUsers(parentNode) {
 	const request = fetch('/account/users', {
   	method: 'GET',
@@ -116,7 +114,10 @@ function getUsers(parentNode) {
     .then((res) => res.json())
     .then(data => renderUsers(data.message, parentNode));
 }
-//*****ADD TASK*****
+
+//*****TASKS*****
+
+//add
 function addTask(event) {
   event.preventDefault();
 	if (!selectUser(event)) return;
@@ -127,21 +128,20 @@ function addTask(event) {
 	    	sendData[key] = value;
 	  	}	
 	  	const request = fetch('/task/add', {
-	 		body: JSON.stringify(sendData),
+	 		  body: JSON.stringify(sendData),
 	  		credentials: 'same-origin',
 	  		method: 'POST',
-	 		headers: {'Content-Type': 'application/json'}
+	 		  headers: {'Content-Type': 'application/json'}
 	  	})
 	    .catch(error => console.log(error));		
-	
+	$('#addMsgModal').modal('show');
 	addTaskForm.description.value = '';
 	addTaskForm.login.options[0].selected = true;			
 }
-addTaskForm.addEventListener('submit', addTask);
-
-//*****ALL TASKS*****
-function getAllTasks() {
-  const request = fetch('/task/all', {
+//get
+function getTasks(state, page = 1) {
+  document.querySelector('#before-load').classList.remove('hidden');
+  const request = fetch(`/task/${state}/${page}`, {
     method: 'GET',
   })
     .then((res) => {
@@ -150,41 +150,19 @@ function getAllTasks() {
       }
     })
     .then((res) => res.json())
-    .then(data => renderTasks(data.message, allTasksTab, 'all'))
-    .catch(error => console.log(error));  
-}
-
-//*****OWN TASKS*****
-function getMyTasks() {
-  const request = fetch('/task/my', {
-    method: 'GET',
-  })
-    .then((res) => {
-      if (200 <= res.status && res.status < 300) {
-        return res;
-      }
+    .then(data => {
+      document.querySelector('#before-load').classList.add('hidden');
+      renderTasks(data.message, currentTab, state);
+      return data;
     })
-    .then((res) => res.json())
-    //.then(data => console.log(data))
-    .then(data => renderTasks(data.message, myTasksTab, 'received'))
-    .catch(error => console.log(error));  
-}
-
-//*****ADDED TASKS*****
-function getAddedTasks() {
-  const request = fetch('/task/added', {
-    method: 'GET',
-  })
-    .then((res) => {
-      if (200 <= res.status && res.status < 300) {
-        return res;
-      }
+    .then((data) => {
+      pageCount = data.pageCount;
+      getPages(data.pageCount);
     })
-    .then((res) => res.json())
-    .then(data => renderTasks(data.message, addedTasksTab, 'added'))
-    .catch(error => console.log(error));  
+    .then(() => setNumber(page))
+    .catch(error => console.log(error));   
 }
-//*****EDIT TASK*****
+//edit
 function updateTask(obj) {
   const request = fetch(`/task/edit/${obj.id}`, {
     body: JSON.stringify(obj),
@@ -192,20 +170,22 @@ function updateTask(obj) {
     method: 'PUT',
     headers: {'Content-Type': 'application/json'}
   })
-  .then((res) => {
+  .then(res => {
       if (200 <= res.status && res.status < 300) {
-        if (appState === 'added') {
-          getAddedTasks();     
-        } else if (appState === 'my') {
-          getMyTasks();  
-        }
+        return res;
       }
     })
-    //.then((res) => res.json())
-    //.then(data => console.log(data))
-    .catch(error => console.log(error));
+  .then(res => res.json())
+  .then(data => {
+    console.log(data);
+    if (currentPage > data.pageCount) {
+      currentPage--;
+    }
+    getTasks(appState, currentPage);
+  })
+  .catch(error => console.log(error));
 }
-//*****DELETE TASK*****
+//delete
 function deleteTaskAction(id) {
   const request = fetch(`/task/delete/${id}`, {
     credentials: 'same-origin',
@@ -213,9 +193,17 @@ function deleteTaskAction(id) {
   })
   .then(res => {
       if (200 <= res.status && res.status < 300) {
-        getAddedTasks();
+        return res;
       }
     })
+  .then(res => res.json())
+  .then(data => {
+    console.log(data);
+    if (currentPage > data.pageCount) {
+      currentPage--;
+    }
+    getTasks(appState, currentPage);
+  })
   .catch(error => console.log(error));   
 }
-//*****CONFIRM ACCOUNT*****
+

@@ -8,12 +8,46 @@ html, body, p, h1, h2, h3, h4, h5, h6 {
 body {
 	background: #f8f6f5;
 }
-/*p {
-	color: red;
-}*/
 main {
 	font-family: 'Noto Sans', sans-serif;
 	color: #585858;
+	
+}
+main .container {
+	/*padding-top: 100px;*/
+	
+}
+.nav-header {
+	background: #ffffff;
+	padding-left: 400px;
+	z-index: 10;
+	position: relative;
+}
+#sidebar {
+	position: absolute;
+	/*height: 100vh;*/
+	width: 350px;
+	top: 60px;
+	left: 0px;
+	z-index: 20;
+}
+#sidebar-switch {
+	color: #007bff;
+    font-family: Font Awesome\ 5 Free;
+    font-weight: 900;
+    font-size: 65px;
+    position: relative;
+    left: 345px;
+    top: -146px;
+    z-index: -1;
+    cursor: pointer;
+    max-width: 30px;
+}
+.jumbotron {
+	margin-top: 56px;
+	margin-bottom: 0px;
+	height: auto;
+
 }
 .hidden {
 	display: none;
@@ -93,12 +127,16 @@ main {
 	top: 10px;
 	right: 20px;
 }
+.delete button:after {
+	content: "\f00d";
+	font-family: Font Awesome\ 5 Free;
+}
 /*Состояние all*/
 .task.all .delete, .task.all .edit, .task.all .change-status, .task.all #task-edit-assigned, .task.all #task-edit-description, .task.all .fas.fa-save {
 	display: none;
 }
-/*Состояние received */
-.task.received .delete, .task.received .edit, .task.received #task-edit-assigned, .task.received #task-edit-description, .task.received .fas.fa-save {
+/*Состояние my */
+.task.my .delete, .task.my .edit, .task.my #task-edit-assigned, .task.my #task-edit-description, .task.my .fas.fa-save {
 	display: none;
 }
 /*Состояние added */
@@ -118,4 +156,57 @@ div[data-status="В процессе"] .wait, div[data-status="В процесс
 }
 div[data-status="Завершено"] .wait, div[data-status="Завершено"] .start {
 	display: none;
+}
+/*PREloader*/
+#before-load {
+  text-align: center;
+  margin-bottom: 30%;
+  margin-top: 20%;
+}
+#before-load i {
+  font-size: 70px; /*размер иконки*//
+  margin: -35px 0 0 -35px; 
+}
+
+/*jumbotron*/
+.jumbotron {
+	background: url("/public/img/header3.jpg") no-repeat #fff;
+	background-size: auto auto;
+	background-position:  left 30%;
+	border-radius: 0px;
+	height: 100vh;
+}
+.jumbotron .display-4 {
+	font-weight: 400;
+	color: #e6e6e6;
+}
+.jumbotron .lead {
+	font-weight: 400;
+	color: #999999;
+}
+
+@media(max-width: 1100px) {
+	.nav-header {
+		padding-left: 0px;	
+	}
+	.nav {
+		flex-direction: column;
+	}
+	.nav-item {
+		text-align: center;
+	}
+	.pagination .page-item a {
+		font-size: 0.7rem;
+		padding: 8px;
+	}
+}
+.nav-item.nav-link {
+	color: #595959;
+	font-weight: 400;
+}
+.nav-item.nav-link.active {
+	font-weight: 700;
+}
+.nav-header {
+	background: #f2f2f2;
 }

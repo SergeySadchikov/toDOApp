@@ -21,6 +21,10 @@ return [
         'controller' => 'account',
         'action' => 'users'
     ],
+    'account/user' => [
+        'controller' => 'account',
+        'action' => 'user'
+    ],
     'account/confirm/{token:\w+}' => [
         'controller' => 'account',
         'action' => 'confirm'
@@ -29,15 +33,15 @@ return [
         'controller' => 'task',
         'action' => 'add'
     ],
-    'task/all' => [
+    'task/all/{page:\d+}' => [
         'controller' => 'task',
         'action' => 'all'
     ],
-    'task/my' => [
+    'task/my/{page:\d+}' => [
         'controller' => 'task',
         'action' => 'my'
     ],
-    'task/added' => [
+    'task/added/{page:\d+}' => [
         'controller' => 'task',
         'action' => 'added'
     ],

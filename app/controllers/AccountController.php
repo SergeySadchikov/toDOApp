@@ -23,10 +23,12 @@ class AccountController extends Controller
             $data = json_decode($postData, true);
             $this->email = $this->validate($data['email']);
             $this->password = $this->validate($data['password']);
-            $user = $this->model->getUser(['email' => $this->email]);
+            $user = $this->model->getUser($this->email);
             if ($user && password_verify($this->password, $user['password'])) {
-                $_SESSION['authorize']['id'] = $user['id'];
-                View::message('success', ['id' => $user['id'], 'login' => $user['login'], 'email' => $user['email']]);
+                if ($user['status']) {
+                    $_SESSION['authorize']['id'] = $user['id'];
+                    View::message('success', ['id' => $user['id'], 'login' => $user['login'], 'email' => $user['email']]);
+                } else {View::message('error', 'Необходимо подтверждение аккаунта');}
             } else {
                 View::message('error', 'Неверный логин и/или пароль');
             }
@@ -46,22 +48,14 @@ class AccountController extends Controller
             if ($data['password'] === $data['confirm']) {
                 $this->password = password_hash($this->validate($data['password']), PASSWORD_DEFAULT);
             }
-            if (!$this->model->getUser(['email' => $this->email])) {
-               $token = $this->model->createToken();
-                $params = [
-                    'login' => $this->login,
-                    'surname' => $this->surname,
-                    'password' => $this->password,
-                    'email' => $this->email,
-                    'token' => $token,
-                    'status' => false
-                ];
-                $id = $this->model->registerUser($params);
+            if (!$this->model->getUser($this->email)) {
+                $token = $this->model->createToken();
+                $this->model->registerUser($this->login, $this->surname, $this->password, $this->email, $token);
                 //высылаем подтверждение
-                mail($this->email, 'Register', 'Confirm:https://to-do/account/confirm/'.$token);
-                $user = $this->model->getUserById(['id' => $id]);
-                $_SESSION['authorize']['id'] = $user['id'];
-                View::message('success', ['id' => $user['id'], 'login' => $user['login'], 'email' => $user['email']]);
+                $message = '<a href="https://to-do/account/confirm/'.$token.'">Кликните по данной ссылке чтобы подвердить аккаунт To-Do App</a>';
+                $headers = 'Content-type: text/html; charset = UTF-8' . "\r\n";
+                mail($this->email, 'Register To-Do App', $message, $headers);
+                View::message('success', 'Необходимо подтвердить аккаунт');
             } else {
                 View::message('error', 'Такой Пользователь уже существует');
             }
@@ -71,18 +65,20 @@ class AccountController extends Controller
     }
     public function confirmAction()
     {
-        if (!$this->model->checkToken($this->route['token'])) {
+        if ($this->model->checkToken($this->route['token'])) {
+            $id = $this->model->checkToken($this->route['token']);
+            $_SESSION['authorize']['id'] = $id;
+            $this->model->activate($this->route['token']);
+            View::redirect('/');
+        } else {
             View::errorCode(404);
         }
-        //$this->model->activate($this->route['token']);
-        View::redirect('/');
-
     }
     public function logoutAction()
     {
         unset($_SESSION['authorize']['id']);
+        View::redirect('/');
     }
-    //Реализовать отдельные классы
     public function validate($string)
     {
         return trim(htmlspecialchars(stripslashes($string)));
@@ -92,5 +88,13 @@ class AccountController extends Controller
         $users = $this->model->getUsers();
         View::message('ok', $users);
     }
+    public function userAction()
+    {
+        if(!$this->checkAcl()) return;
+        $user = $this->model->getUserById($_SESSION['authorize']['id']);
+        $data = ['id' => $user['id'], 'email' => $user['email']];
+        View::message('success', $data);
+    }
+
 }
 

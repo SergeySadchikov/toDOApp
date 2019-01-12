@@ -8,7 +8,7 @@
     <title><?php echo $title;?></title>
 </head>
 <body>
-<!--    --><?php //echo $content; ?>
+
     <h1>Register</h1>
 
 

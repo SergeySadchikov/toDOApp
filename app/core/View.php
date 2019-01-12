@@ -19,9 +19,8 @@ class View
     public function __construct($route)
     {
         $this->route = $route;
-        $this->path = $this->route['controller'].'/'.$route['action'];
-        //debug($this->path);
-
+        //$this->path = $this->route['controller'].'/'.$route['action'];
+        //debug($this->path)
     }
     public function render($title, $vars = [])
     {
@@ -51,10 +50,14 @@ class View
     }
 
     //AJAX
-    public static function message($status, $message)
+    public static function message($status, $message, $pageCount = false)
     {
         header('Content-Type: application/json');
-        exit(json_encode(['status' => $status, 'message' => $message]));
+        $response = ['status' => $status, 'message' => $message];
+        if ($pageCount) {
+            $response += ['pageCount' => $pageCount];
+        }
+        exit(json_encode($response));
     }
     public function redirectLocation($url)
     {

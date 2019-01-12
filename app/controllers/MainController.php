@@ -14,17 +14,14 @@ class MainController extends Controller
 {
     public $auth = false;
 
-   public function indexAction()
+    public function indexAction()
     {
-    //       $result  = $this->model->getTasks();
-    //       $var = [
-    //           'tasks' => $result
-    //       ];
-     if ($this->checkAcl()) {
-         $this->auth = true;
-    }
-        $this->var += ['auth' => $this->auth];
-        //debug($this->var);
-        $this->view->render('To-Do', $this->var);
+        //Проверка доступа
+        if(!$this->checkAcl()) {
+            $this->view->path = '/account/login';;
+        } else {
+            $this->view->path = 'main/index';
+        }
+        $this->view->render('To-Do');
     }
 }

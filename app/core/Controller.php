@@ -24,10 +24,6 @@ abstract class Controller
         $this->route = $route;
         $this->view = new View($route);
         $this->model = $this->loadModel($route['controller']);
-        //Проверка доступа
-        if(!$this->checkAcl()) {
-            //$this->view->redirect('/account/login');
-        }
     }
     public function loadModel($name)
     {
