@@ -1,4 +1,5 @@
 <?php
+
 require 'app/lib/dev.php';
 require 'app/autoloader.php';
 
